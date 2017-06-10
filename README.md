@@ -1,0 +1,2 @@
+# gamesocialid
+GameSocial Identity Service
