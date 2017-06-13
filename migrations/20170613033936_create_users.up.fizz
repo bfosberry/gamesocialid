@@ -1,0 +1,11 @@
+create_table("users", func(t) {
+	t.Column("id", "uuid", {"primary": true})
+	t.Column("username", "string", {})
+	t.Column("real_name", "string", {})
+	t.Column("country", "string", {})
+	t.Column("region", "string", {})
+	t.Column("avatar_url", "string", {})
+	t.Column("email", "string", {})
+	t.Column("visibility", "bool", {})
+	t.Column("admin", "bool", {})
+})

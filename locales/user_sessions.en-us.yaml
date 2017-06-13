@@ -1,0 +1,6 @@
+- id: "user_sessions.created.success"
+  translation: "UserSession was successfully created."
+- id: "user_sessions.updated.success"
+  translation: "UserSession was successfully updated."
+- id: "user_sessions.destroyed.success"
+  translation: "UserSession was successfully destroyed."

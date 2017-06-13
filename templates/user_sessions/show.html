@@ -1,0 +1,20 @@
+<h1>UserSessions#Show</h1>
+
+<ul class="list-unstyled list-inline">
+  <li><a href="<%= userSessionsPath() %>" class="btn btn-info">Back to all UserSessions</a></li>
+  <li><a href="<%= editUserSessionPath({ user_session_id: userSession.ID })%>" class="btn btn-warning">Edit</a></li>
+  <li><a href="<%= userSessionPath({ user_session_id: userSession.ID })%>" data-method="DELETE" data-confirm="Are you sure?" class="btn btn-danger">Destroy</a>
+</ul>
+
+<p>
+  <strong>SessionKey</strong>: <%= userSession.SessionKey %>
+</p>
+<p>
+  <strong>UserId</strong>: <%= userSession.UserID %>
+</p>
+<p>
+  <strong>LoginTime</strong>: <%= userSession.LoginTime %>
+</p>
+<p>
+  <strong>LastSeeTime</strong>: <%= userSession.LastSeeTime %>
+</p>

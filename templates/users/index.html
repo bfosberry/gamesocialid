@@ -1,0 +1,40 @@
+<h1>Users</h1>
+
+<p>
+  <a href="<%= newUserPath() %>" class="btn btn-primary">Create New User</a>
+</p>
+
+<table class="table table-striped">
+  <thead>
+  <th>Username</th>
+    <th>RealName</th>
+    <th>Country</th>
+    <th>Region</th>
+    <th>AvatarUrl</th>
+    <th>Email</th>
+    <th>Visibility</th>
+    <th>Admin</th>
+    <th>&nbsp;</th>
+  </thead>
+  <tbody>
+    <%= for (user) in users { %>
+      <tr>
+      <td><%= user.Username %></td>
+        <td><%= user.RealName %></td>
+        <td><%= user.Country %></td>
+        <td><%= user.Region %></td>
+        <td><%= user.AvatarUrl %></td>
+        <td><%= user.Email %></td>
+        <td><%= user.Visibility %></td>
+        <td><%= user.Admin %></td>
+        <td>
+          <div class="pull-right">
+            <a href="<%= userPath({ user_id: user.ID }) %>" class="btn btn-info">View</a>
+            <a href="<%= editUserPath({ user_id: user.ID }) %>" class="btn btn-warning">Edit</a>
+            <a href="<%= userPath({ user_id: user.ID }) %>" data-method="DELETE" data-confirm="Are you sure?" class="btn btn-danger">Destroy</a>
+          </div>
+        </td>
+      </tr>
+    <% } %>
+  </tbody>
+</table>

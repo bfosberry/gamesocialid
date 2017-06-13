@@ -1,0 +1,32 @@
+<h1>UserSessions</h1>
+
+<p>
+  <a href="<%= newUserSessionPath() %>" class="btn btn-primary">Create New UserSession</a>
+</p>
+
+<table class="table table-striped">
+  <thead>
+  <th>SessionKey</th>
+    <th>UserId</th>
+    <th>LoginTime</th>
+    <th>LastSeeTime</th>
+    <th>&nbsp;</th>
+  </thead>
+  <tbody>
+    <%= for (userSession) in userSessions { %>
+      <tr>
+      <td><%= userSession.SessionKey %></td>
+        <td><%= userSession.UserID %></td>
+        <td><%= userSession.LoginTime %></td>
+        <td><%= userSession.LastSeeTime %></td>
+        <td>
+          <div class="pull-right">
+            <a href="<%= userSessionPath({ user_session_id: userSession.ID }) %>" class="btn btn-info">View</a>
+            <a href="<%= editUserSessionPath({ user_session_id: userSession.ID }) %>" class="btn btn-warning">Edit</a>
+            <a href="<%= userSessionPath({ user_session_id: userSession.ID }) %>" data-method="DELETE" data-confirm="Are you sure?" class="btn btn-danger">Destroy</a>
+          </div>
+        </td>
+      </tr>
+    <% } %>
+  </tbody>
+</table>

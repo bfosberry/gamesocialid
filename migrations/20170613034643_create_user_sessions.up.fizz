@@ -1,0 +1,7 @@
+create_table("user_sessions", func(t) {
+	t.Column("id", "uuid", {"primary": true})
+	t.Column("session_key", "string", {})
+	t.Column("user_id", "uuid", {})
+	t.Column("login_time", "timestamp", {})
+	t.Column("last_see_time", "timestamp", {})
+})
