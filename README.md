@@ -7,7 +7,7 @@ GameSocial Identity Service provides centralized SSO aggregation for gaming rela
 * Battle.net
 * Twitch
 * Youtube
-* ?
+* Player.me
 
 As well as standard common SSO signins:
 
