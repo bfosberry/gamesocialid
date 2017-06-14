@@ -22,6 +22,7 @@ type Credential struct {
 	ProfileUrl   string    `json:"profile_url" db:"profile_url"`
 	ImageUrl     string    `json:"image_url" db:"image_url"`
 	RefreshToken string    `json:"refresh_token" db:"refresh_token"`
+	AccessToken  string    `json:"access_token" db:"access_token"`
 	TokenExpiry  string    `json:"token_expiry" db:"token_expiry"`
 	Uid          string    `json:"uid" db:"uid"`
 }
