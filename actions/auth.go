@@ -12,7 +12,10 @@ import (
 	"github.com/gobuffalo/buffalo"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
+	"github.com/markbates/goth/providers/facebook"
 	"github.com/markbates/goth/providers/steam"
+	"github.com/markbates/goth/providers/twitch"
+	"github.com/markbates/goth/providers/twitter"
 	"github.com/markbates/pop"
 	"github.com/satori/go.uuid"
 )
@@ -35,11 +38,15 @@ func init() {
 
 	goth.UseProviders(
 		steam.New(os.Getenv("STEAM_API_KEY"), fmt.Sprintf("%s%s", App().Host, "/auth/steam/callback")),
+		twitter.New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), fmt.Sprintf("%s%s", App().Host, "/auth/twitter/callback")),
+		facebook.New(os.Getenv("FACEBOOK_KEY"), os.Getenv("FACEBOOK_SECRET"), fmt.Sprintf("%s%s", App().Host, "/auth/facebook/callback")),
+		twitch.New(os.Getenv("TWITCH_KEY"), os.Getenv("TWITCH_SECRET"), fmt.Sprintf("%s%s", App().Host, "/auth/twitch/callback")),
 	)
 }
 
 func AuthCallback(c buffalo.Context) error {
 	userData, err := gothic.CompleteUserAuth(c.Response(), c.Request())
+	c.Logger().Infof("UserData is %+v\n", userData)
 	if err != nil {
 		return c.Error(401, err)
 	}
@@ -101,7 +108,7 @@ func createCredential(tx *pop.Connection, userData goth.User, user *models.User)
 	credential.Nickname = userData.NickName
 	credential.Email = userData.Email
 	credential.ImageUrl = userData.AvatarURL
-	credential.ProfileUrl = profileURL(userData.Provider, userData.UserID)
+	credential.ProfileUrl = profileURL(userData.Provider, userData.UserID, userData.Name)
 	credential.AccessToken = userData.AccessToken
 	credential.RefreshToken = userData.RefreshToken
 	credential.TokenExpiry = userData.ExpiresAt.String()
@@ -109,16 +116,23 @@ func createCredential(tx *pop.Connection, userData goth.User, user *models.User)
 	return tx.Create(credential)
 }
 
-func profileURL(provider, uid string) string {
+func profileURL(provider, uid, name string) string {
 	switch provider {
 	case "steam":
 		return steamProfileURL(uid)
+	case "twitch":
+		return twitchProfileURL(name)
 	}
 	return ""
 
 }
+
 func steamProfileURL(uid string) string {
 	return fmt.Sprintf("http://steamcommunity.com/profiles/%s", uid)
+}
+
+func twitchProfileURL(name string) string {
+	return fmt.Sprintf("https://www.twitch.tv/%s", name)
 }
 
 func DecorateUserID(next buffalo.Handler) buffalo.Handler {
