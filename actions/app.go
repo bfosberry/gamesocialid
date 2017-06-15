@@ -3,15 +3,12 @@ package actions
 import (
 	"log"
 
+	"github.com/bfosberry/gamesocialid/models"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/middleware"
 	"github.com/gobuffalo/buffalo/middleware/i18n"
-
-	"github.com/bfosberry/gamesocialid/models"
-
 	"github.com/gobuffalo/envy"
 	"github.com/gobuffalo/packr"
-
 	"github.com/markbates/goth/gothic"
 )
 
@@ -52,9 +49,16 @@ func App() *buffalo.App {
 		app.GET("/", HomeHandler)
 
 		app.ServeFiles("/assets", packr.NewBox("../public/assets"))
-		app.Resource("/users", UsersResource{&buffalo.BaseResource{}})
-		app.Resource("/credentials", CredentialsResource{&buffalo.BaseResource{}})
-		app.Resource("/user_sessions", UserSessionsResource{&buffalo.BaseResource{}})
+
+		userGroup := app.Group("/")
+		userGroup.Use(UserLoggedIn)
+		userGroup.Resource("/users", UsersResource{&buffalo.BaseResource{}})
+		userGroup.Resource("/credentials", CredentialsResource{&buffalo.BaseResource{}})
+
+		adminGroup := userGroup.Group("/")
+		adminGroup.Use(Admin)
+		adminGroup.Resource("/user_sessions", UserSessionsResource{&buffalo.BaseResource{}})
+
 		auth := app.Group("/auth")
 		auth.GET("/logout", Logout)
 		auth.GET("/{provider}", buffalo.WrapHandlerFunc(gothic.BeginAuthHandler))

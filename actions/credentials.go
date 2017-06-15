@@ -30,7 +30,8 @@ func (v CredentialsResource) List(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
 	credentials := &models.Credentials{}
 	// You can order your list here. Just change
-	err := tx.All(credentials)
+	userID := currentUserID(c)
+	err := tx.Where("user_id = ?", userID).All(credentials)
 	// to:
 	// err := tx.Order("(case when completed then 1 else 2 end) desc, lower([sort_parameter]) asc").All(credentials)
 	// Don't forget to change [sort_parameter] to the parameter of
@@ -54,6 +55,10 @@ func (v CredentialsResource) Show(c buffalo.Context) error {
 	err := tx.Find(credential, c.Param("credential_id"))
 	if err != nil {
 		return err
+	}
+	userID := currentUserID(c)
+	if credential.UserID != userID {
+		return c.Error(404, ErrNotFound)
 	}
 	// Make credential available inside the html template
 	c.Set("credential", credential)
@@ -111,6 +116,10 @@ func (v CredentialsResource) Edit(c buffalo.Context) error {
 	if err != nil {
 		return err
 	}
+	userID := currentUserID(c)
+	if credential.UserID != userID {
+		return c.Error(404, ErrNotFound)
+	}
 	// Make credential available inside the html template
 	c.Set("credential", credential)
 	return c.Render(200, r.HTML("credentials/edit.html"))
@@ -126,6 +135,10 @@ func (v CredentialsResource) Update(c buffalo.Context) error {
 	err := tx.Find(credential, c.Param("credential_id"))
 	if err != nil {
 		return err
+	}
+	userID := currentUserID(c)
+	if credential.UserID != userID {
+		return c.Error(404, ErrNotFound)
 	}
 	// Bind credential to the html form elements
 	err = c.Bind(credential)
@@ -162,6 +175,10 @@ func (v CredentialsResource) Destroy(c buffalo.Context) error {
 	err := tx.Find(credential, c.Param("credential_id"))
 	if err != nil {
 		return err
+	}
+	userID := currentUserID(c)
+	if credential.UserID != userID {
+		return c.Error(404, ErrNotFound)
 	}
 	err = tx.Destroy(credential)
 	if err != nil {

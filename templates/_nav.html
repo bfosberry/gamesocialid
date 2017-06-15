@@ -10,9 +10,9 @@
       <li <%= if (current_path == "/") { %>class="active"<% } %>>
         <a href="/">Home</a>
       </li>
-     <!-- <li <%= if (current_path == "/webhooks") { %>class="active"<% } %>>
-        <a href="/webhooks">Your Webhooks</a>
-      </li>-->
+     <li <%= if (current_path == "/credentials") { %>class="active"<% } %>>
+        <a href="/credentials">My Credentials</a>
+      </li>
       <!--
       <li>
         <a href="#">Link</a>
@@ -51,15 +51,20 @@
       </button>
     </form>-->
     <ul class="nav navbar-nav navbar-right">
-      <li>
-        <%= if (!error_code || error_code == 401) { %>
-          <%= if (is_logged_in) { %>
+      <%= if (!error_code || error_code == 401) { %>
+        <%= if (is_logged_in) { %>
+          <li>
+            <a href="/users/<%= user_id %>" class="login-link" role="button">Profile</a>
+          </li>
+          <li>
             <a href="/auth/logout" class="login-link" role="button">Logout</a>
-          <% } else { %>
+          </li>
+        <% } else { %>
+          <li>
             <a href="/auth/steam" class="login-link">Login with Steam</a>
-          <% } %>
+          </li>
         <% } %>
-      </li>
+      <% } %>
     </ul>
   </div>
 </nav>

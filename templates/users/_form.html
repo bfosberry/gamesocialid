@@ -4,6 +4,5 @@
 <%= f.InputTag("Region") %>
 <%= f.InputTag("AvatarUrl") %>
 <%= f.InputTag("Email") %>
-<%= f.InputTag("Visibility") %>
-<%= f.InputTag("Admin") %>
+<%= f.InputTag("Public", {"name": "Visibility", "value": user.Visibility, "id": "user-Visibility"}) %>
 <button class="btn btn-success" role="submit">Save</button>

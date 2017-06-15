@@ -1,10 +1,4 @@
-<h1>Users#Show</h1>
-
-<ul class="list-unstyled list-inline">
-  <li><a href="<%= usersPath() %>" class="btn btn-info">Back to all Users</a></li>
-  <li><a href="<%= editUserPath({ user_id: user.ID })%>" class="btn btn-warning">Edit</a></li>
-  <li><a href="<%= userPath({ user_id: user.ID })%>" data-method="DELETE" data-confirm="Are you sure?" class="btn btn-danger">Destroy</a>
-</ul>
+<h1>My Profile</h1>
 
 <p>
   <strong>Username</strong>: <%= user.Username %>
@@ -25,8 +19,9 @@
   <strong>Email</strong>: <%= user.Email %>
 </p>
 <p>
-  <strong>Visibility</strong>: <%= user.Visibility %>
+  <strong>Public</strong>: <%= user.Visibility %>
 </p>
-<p>
-  <strong>Admin</strong>: <%= user.Admin %>
-</p>
+
+<ul class="list-unstyled list-inline">
+  <li><a href="<%= editUserPath({ user_id: user.ID })%>" class="btn btn-warning">Edit</a></li>
+</ul>

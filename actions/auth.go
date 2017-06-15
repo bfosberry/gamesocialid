@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -23,6 +24,12 @@ const (
 	AdminKey    = "is_admin"
 )
 
+var (
+	ErrUnauthorized    = errors.New("Forbidden Brah")
+	ErrUnauthenticated = errors.New("Login Brah")
+	ErrNotFound        = errors.New("Missing Brah")
+)
+
 func init() {
 	gothic.Store = App().SessionStore
 
@@ -37,19 +44,12 @@ func AuthCallback(c buffalo.Context) error {
 		return c.Error(401, err)
 	}
 
-	tx := c.Value("tx").(*pop.Connection)
-	user_id_uuid := uuid.Nil
-	user_id := c.Value("user_id")
-	var user *models.User
-
-	if user_id != nil {
-		user_id_uuid = user_id.(uuid.UUID)
-		user = &models.User{}
-		if err := tx.Find(user, user_id_uuid); err != nil && !strings.Contains(err.Error(), "no rows in result set") {
-			return err
-		}
+	user, err := currentUser(c)
+	if err != nil {
+		return err
 	}
 
+	tx := c.Value("tx").(*pop.Connection)
 	credential := &models.Credential{}
 	err = tx.Where("provider = ?", userData.Provider).Where("uid = ?", userData.UserID).First(credential)
 	if err == nil {
@@ -101,12 +101,24 @@ func createCredential(tx *pop.Connection, userData goth.User, user *models.User)
 	credential.Nickname = userData.NickName
 	credential.Email = userData.Email
 	credential.ImageUrl = userData.AvatarURL
-	credential.ProfileUrl = "unknown"
+	credential.ProfileUrl = profileURL(userData.Provider, userData.UserID)
 	credential.AccessToken = userData.AccessToken
 	credential.RefreshToken = userData.RefreshToken
 	credential.TokenExpiry = userData.ExpiresAt.String()
 	credential.UserID = user.ID
 	return tx.Create(credential)
+}
+
+func profileURL(provider, uid string) string {
+	switch provider {
+	case "steam":
+		return steamProfileURL(uid)
+	}
+	return ""
+
+}
+func steamProfileURL(uid string) string {
+	return fmt.Sprintf("http://steamcommunity.com/profiles/%s", uid)
 }
 
 func DecorateUserID(next buffalo.Handler) buffalo.Handler {
@@ -130,6 +142,54 @@ func DecorateUserID(next buffalo.Handler) buffalo.Handler {
 		c.Set(LoggedInKey, loggedIn)
 		return next(c)
 	}
+}
+
+func Admin(next buffalo.Handler) buffalo.Handler {
+	return func(c buffalo.Context) error {
+		if err := requireAdmin(c); err != nil {
+			return err
+		}
+		return next(c)
+	}
+}
+
+func UserLoggedIn(next buffalo.Handler) buffalo.Handler {
+	return func(c buffalo.Context) error {
+		if err := requireLoggedIn(c); err != nil {
+			return err
+		}
+		return next(c)
+	}
+}
+
+func requireAdmin(c buffalo.Context) error {
+	if !isAdmin(c) {
+		return c.Error(403, ErrUnauthorized)
+	}
+	return nil
+}
+
+func requireLoggedIn(c buffalo.Context) error {
+	if !isLoggedIn(c) {
+		return c.Error(401, ErrUnauthenticated)
+	}
+	return nil
+}
+
+func isAdmin(c buffalo.Context) bool {
+	isAdmin := c.Value(AdminKey)
+	if isAdmin != nil && isAdmin.(bool) {
+		return true
+	}
+	return false
+}
+
+func isLoggedIn(c buffalo.Context) bool {
+	isLoggedIn := c.Value(LoggedInKey)
+	if isLoggedIn != nil && isLoggedIn.(bool) {
+		return true
+	}
+	return false
 }
 
 func Logout(c buffalo.Context) error {
@@ -166,6 +226,27 @@ func logoutUser(c buffalo.Context) error {
 		}
 	}
 	c.Set(UserIDKey, nil)
-
+	c.Flash().Add("success", "Logged out")
 	return c.Redirect(http.StatusTemporaryRedirect, "/")
+}
+
+func currentUser(c buffalo.Context) (*models.User, error) {
+	tx := c.Value("tx").(*pop.Connection)
+	userID := currentUserID(c)
+	if userID != uuid.Nil {
+		user := &models.User{}
+		if err := tx.Find(user, userID); err != nil && !strings.Contains(err.Error(), "no rows in result set") {
+			return nil, err
+		}
+		return user, nil
+	}
+	return nil, nil
+}
+
+func currentUserID(c buffalo.Context) uuid.UUID {
+	userID := c.Value(UserIDKey)
+	if userID != nil {
+		return userID.(uuid.UUID)
+	}
+	return uuid.Nil
 }

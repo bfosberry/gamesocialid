@@ -27,6 +27,7 @@ type UsersResource struct {
 // GET /users
 func (v UsersResource) List(c buffalo.Context) error {
 	// Get the DB connection from the context
+	requireAdmin(c)
 	tx := c.Value("tx").(*pop.Connection)
 	users := &models.Users{}
 	// You can order your list here. Just change
@@ -46,6 +47,10 @@ func (v UsersResource) List(c buffalo.Context) error {
 // Show gets the data for one User. This function is mapped to
 // the path GET /users/{user_id}
 func (v UsersResource) Show(c buffalo.Context) error {
+	userID := currentUserID(c)
+	if c.Param("user_id") != userID.String() {
+		return c.Error(404, ErrNotFound)
+	}
 	// Get the DB connection from the context
 	tx := c.Value("tx").(*pop.Connection)
 	// Allocate an empty User
@@ -63,6 +68,7 @@ func (v UsersResource) Show(c buffalo.Context) error {
 // New renders the formular for creating a new user.
 // This function is mapped to the path GET /users/new
 func (v UsersResource) New(c buffalo.Context) error {
+	requireAdmin(c)
 	// Make user available inside the html template
 	c.Set("user", &models.User{})
 	return c.Render(200, r.HTML("users/new.html"))
@@ -71,6 +77,7 @@ func (v UsersResource) New(c buffalo.Context) error {
 // Create adds a user to the DB. This function is mapped to the
 // path POST /users
 func (v UsersResource) Create(c buffalo.Context) error {
+	requireAdmin(c)
 	// Allocate an empty User
 	user := &models.User{}
 	// Bind user to the html form elements
@@ -103,10 +110,18 @@ func (v UsersResource) Create(c buffalo.Context) error {
 // Edit renders a edit formular for a user. This function is
 // mapped to the path GET /users/{user_id}/edit
 func (v UsersResource) Edit(c buffalo.Context) error {
+	userID := currentUserID(c)
+	if c.Param("user_id") != userID.String() {
+		return c.Error(404, ErrNotFound)
+	}
 	// Get the DB connection from the context
 	tx := c.Value("tx").(*pop.Connection)
 	// Allocate an empty User
 	user := &models.User{}
+	admin := isAdmin(c)
+	if !admin {
+		user.Admin = false
+	}
 	err := tx.Find(user, c.Param("user_id"))
 	if err != nil {
 		return err
@@ -119,6 +134,10 @@ func (v UsersResource) Edit(c buffalo.Context) error {
 // Update changes a user in the DB. This function is mapped to
 // the path PUT /users/{user_id}
 func (v UsersResource) Update(c buffalo.Context) error {
+	userID := currentUserID(c)
+	if c.Param("user_id") != userID.String() {
+		return c.Error(404, ErrNotFound)
+	}
 	// Get the DB connection from the context
 	tx := c.Value("tx").(*pop.Connection)
 	// Allocate an empty User
@@ -154,6 +173,10 @@ func (v UsersResource) Update(c buffalo.Context) error {
 // Destroy deletes a user from the DB. This function is mapped
 // to the path DELETE /users/{user_id}
 func (v UsersResource) Destroy(c buffalo.Context) error {
+	userID := currentUserID(c)
+	if c.Param("user_id") != userID.String() {
+		return c.Error(404, ErrNotFound)
+	}
 	// Get the DB connection from the context
 	tx := c.Value("tx").(*pop.Connection)
 	// Allocate an empty User
