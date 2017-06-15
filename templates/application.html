@@ -7,8 +7,14 @@
     <meta name="csrf-token" content="<%= authenticity_token %>" />
   </head>
   <body>
-
-    <div class="container">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-12">
+          <%= partial("nav.html") %>
+        </div>
+      </div>
+    </div>
+    <div class="container-fluid">
       <%= partial("flash.html") %>
 
       <%= yield %>

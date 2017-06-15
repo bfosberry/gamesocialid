@@ -39,6 +39,8 @@ func App() *buffalo.App {
 
 		app.Use(middleware.PopTransaction(models.DB))
 
+		app.Use(DecorateUserID)
+
 		// Setup and use translations:
 		var err error
 		T, err = i18n.New(packr.NewBox("../locales"), "en-US")
@@ -54,6 +56,7 @@ func App() *buffalo.App {
 		app.Resource("/credentials", CredentialsResource{&buffalo.BaseResource{}})
 		app.Resource("/user_sessions", UserSessionsResource{&buffalo.BaseResource{}})
 		auth := app.Group("/auth")
+		auth.GET("/logout", Logout)
 		auth.GET("/{provider}", buffalo.WrapHandlerFunc(gothic.BeginAuthHandler))
 		auth.GET("/{provider}/callback", AuthCallback)
 	}

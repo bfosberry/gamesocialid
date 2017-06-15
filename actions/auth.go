@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/bfosberry/gamesocialid/models"
 	"github.com/gobuffalo/buffalo"
@@ -12,6 +13,14 @@ import (
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/steam"
 	"github.com/markbates/pop"
+	"github.com/satori/go.uuid"
+)
+
+const (
+	SessionKey  = "GSID_USER_SESSION"
+	UserIDKey   = "user_id"
+	LoggedInKey = "is_logged_in"
+	AdminKey    = "is_admin"
 )
 
 func init() {
@@ -29,14 +38,14 @@ func AuthCallback(c buffalo.Context) error {
 	}
 
 	tx := c.Value("tx").(*pop.Connection)
-	user_id_str := ""
+	user_id_uuid := uuid.Nil
 	user_id := c.Value("user_id")
 	var user *models.User
 
 	if user_id != nil {
-		user_id_str = user_id.(string)
+		user_id_uuid = user_id.(uuid.UUID)
 		user = &models.User{}
-		if err := tx.Find(user, user_id_str); err != nil && !strings.Contains(err.Error(), "no rows in result set") {
+		if err := tx.Find(user, user_id_uuid); err != nil && !strings.Contains(err.Error(), "no rows in result set") {
 			return err
 		}
 	}
@@ -44,13 +53,14 @@ func AuthCallback(c buffalo.Context) error {
 	credential := &models.Credential{}
 	err = tx.Where("provider = ?", userData.Provider).Where("uid = ?", userData.UserID).First(credential)
 	if err == nil {
-
 		if user == nil {
 			user = &models.User{}
 			if err := tx.Find(user, credential.UserID); err != nil {
 				return err
 			}
-			// TODO handle login for user
+			if err := loginUser(tx, c.Session(), user); err != nil {
+				return err
+			}
 		} else if user.ID != credential.UserID {
 			credential.UserID = user.ID
 			if err := tx.Save(credential); err != nil {
@@ -70,16 +80,15 @@ func AuthCallback(c buffalo.Context) error {
 			if err := tx.Create(user); err != nil {
 				return err
 			}
+			if err := loginUser(tx, c.Session(), user); err != nil {
+				return err
+			}
 		}
 		if err := createCredential(tx, userData, user); err != nil {
 			return err
 		}
-
-		// if user is logged in associate credential with user
-		// if user is not logged in create a new user and associate it with this credential
 		c.Flash().Add("success", fmt.Sprintf("Successfully signed into %s", userData.Provider))
 	}
-	// TODO UserID       uuid.UUID `json:"user_id" db:"user_id"`
 
 	return c.Redirect(http.StatusTemporaryRedirect, "/")
 }
@@ -98,4 +107,65 @@ func createCredential(tx *pop.Connection, userData goth.User, user *models.User)
 	credential.TokenExpiry = userData.ExpiresAt.String()
 	credential.UserID = user.ID
 	return tx.Create(credential)
+}
+
+func DecorateUserID(next buffalo.Handler) buffalo.Handler {
+	return func(c buffalo.Context) error {
+		loggedIn := false
+		sessionKey := c.Session().Get(SessionKey)
+		if sessionKey != nil {
+			sessionKeyStr := sessionKey.(string)
+			userSession := &models.UserSession{}
+			tx := c.Value("tx").(*pop.Connection)
+			if err := tx.Where("session_key = ?", sessionKeyStr).First(userSession); err == nil {
+				user := &models.User{}
+				if err := tx.Find(user, userSession.UserID); err == nil {
+					c.Logger().WithField("session_key", sessionKeyStr).Info("user_is_logged_in")
+					c.Set(UserIDKey, userSession.UserID)
+					c.Set(AdminKey, user.Admin)
+					loggedIn = true
+				}
+			}
+		}
+		c.Set(LoggedInKey, loggedIn)
+		return next(c)
+	}
+}
+
+func Logout(c buffalo.Context) error {
+	return logoutUser(c)
+}
+
+func loginUser(tx *pop.Connection, s *buffalo.Session, user *models.User) error {
+	now := time.Now()
+	userSession := &models.UserSession{
+		UserID:      user.ID,
+		SessionKey:  uuid.NewV4().String(),
+		LoginTime:   &now,
+		LastSeeTime: &now,
+	}
+
+	if err := tx.Create(userSession); err != nil {
+		return err
+	}
+	s.Set(SessionKey, userSession.SessionKey)
+	return nil
+}
+
+func logoutUser(c buffalo.Context) error {
+	sessionKey := c.Session().Get(SessionKey)
+	c.Session().Delete(SessionKey)
+	if sessionKey != nil {
+		sessionKeyStr := sessionKey.(string)
+		tx := c.Value("tx").(*pop.Connection)
+		sess := &models.UserSession{}
+		if err := tx.Where("session_key = ?", sessionKeyStr).First(sess); err == nil {
+			if err := tx.Destroy(sess); err != nil {
+				return err
+			}
+		}
+	}
+	c.Set(UserIDKey, nil)
+
+	return c.Redirect(http.StatusTemporaryRedirect, "/")
 }
