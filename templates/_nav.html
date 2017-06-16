@@ -57,6 +57,9 @@
             <a href="/users/<%= user_id %>" class="login-link" role="button">Profile</a>
           </li>
           <li>
+            <a href="" class="login-link" role="button" data-toggle="modal" data-target="#accountModal" >Add Account</a>
+          </li>
+          <li>
             <a href="/auth/logout" class="login-link" role="button">Logout</a>
           </li>
         <% } else { %>
@@ -68,3 +71,23 @@
     </ul>
   </div>
 </nav>
+
+<div class="modal fade" id="accountModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add Gaming Account</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <a href="/auth/steam" class="btn btn-primary account-button" role="button">Steam</a>
+        <a href="/auth/twitch" class="btn btn-primary account-button" role="button">Twitch</a>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
