@@ -40,7 +40,6 @@ func New(clientKey, secret, callbackURL string, scopes ...string) *Provider {
 		CallbackURL:  callbackURL,
 		providerName: "battlenet",
 	}
-	fmt.Printf("%+v\n", *p)
 	p.config = newConfig(p, scopes)
 	return p
 }
@@ -64,7 +63,6 @@ func (p *Provider) Debug(debug bool) {}
 
 // BeginAuth asks Battle.net for an authentication end-point.
 func (p *Provider) BeginAuth(state string) (goth.Session, error) {
-	fmt.Printf("Starting auth, state is %s\n", state)
 	return &Session{
 		AuthURL: p.config.AuthCodeURL(state),
 	}, nil
@@ -104,11 +102,16 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 	}
 
 	u := struct {
-		UserID   string `json:"id"`
-		NickName string `json:"battletag"`
+		ID        int64  `json:"id"`
+		Battletag string `json:"battletag"`
 	}{}
 
-	err = json.NewDecoder(bytes.NewReader(bits)).Decode(&u)
+	if err = json.NewDecoder(bytes.NewReader(bits)).Decode(&u); err != nil {
+		return user, err
+	}
+
+	user.NickName = u.Battletag
+	user.UserID = fmt.Sprintf("%d", u.ID)
 	return user, err
 }
 
@@ -129,7 +132,6 @@ func newConfig(provider *Provider, scopes []string) *oauth2.Config {
 			c.Scopes = append(c.Scopes, scope)
 		}
 	}
-	fmt.Printf("Config is %+v\n", *c)
 	return c
 }
 

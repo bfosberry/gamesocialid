@@ -12,6 +12,7 @@ import (
 	"github.com/gobuffalo/buffalo"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
+	"github.com/markbates/goth/providers/battlenet"
 	"github.com/markbates/goth/providers/facebook"
 	"github.com/markbates/goth/providers/steam"
 	"github.com/markbates/goth/providers/twitch"
@@ -41,6 +42,7 @@ func init() {
 		twitter.New(os.Getenv("TWITTER_KEY"), os.Getenv("TWITTER_SECRET"), fmt.Sprintf("%s%s", App().Host, "/auth/twitter/callback")),
 		facebook.New(os.Getenv("FACEBOOK_KEY"), os.Getenv("FACEBOOK_SECRET"), fmt.Sprintf("%s%s", App().Host, "/auth/facebook/callback")),
 		twitch.New(os.Getenv("TWITCH_KEY"), os.Getenv("TWITCH_SECRET"), fmt.Sprintf("%s%s", App().Host, "/auth/twitch/callback")),
+		battlenet.New(os.Getenv("BATTLENET_KEY"), os.Getenv("BATTLENET_SECRET"), "https://id.gamesocial.co/auth/battlenet/callback"), // fmt.Sprintf("%s%s", App().Host, "/auth/battlenet/callback")),
 	)
 }
 
@@ -69,8 +71,11 @@ func AuthCallback(c buffalo.Context) error {
 				return err
 			}
 		} else if user.ID != credential.UserID {
-			credential.UserID = user.ID
-			if err := tx.Save(credential); err != nil {
+			if err := tx.Destroy(credential); err != nil {
+				return err
+			}
+
+			if err := createCredential(tx, userData, user); err != nil {
 				return err
 			}
 		}

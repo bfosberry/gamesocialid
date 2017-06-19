@@ -41,6 +41,7 @@ func (v CredentialsResource) List(c buffalo.Context) error {
 	}
 	// Make credentials available inside the html template
 	c.Set("credentials", credentials)
+	c.Set("owner", true)
 	return c.Render(200, r.HTML("credentials/index.html"))
 }
 

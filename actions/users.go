@@ -48,9 +48,6 @@ func (v UsersResource) List(c buffalo.Context) error {
 // the path GET /users/{user_id}
 func (v UsersResource) Show(c buffalo.Context) error {
 	userID := currentUserID(c)
-	if c.Param("user_id") != userID.String() {
-		return c.Error(404, ErrNotFound)
-	}
 	// Get the DB connection from the context
 	tx := c.Value("tx").(*pop.Connection)
 	// Allocate an empty User
@@ -60,8 +57,20 @@ func (v UsersResource) Show(c buffalo.Context) error {
 	if err != nil {
 		return err
 	}
+	if user.Visibility == false && c.Param("user_id") != userID.String() {
+		return c.Error(404, ErrNotFound)
+	}
+
+	credentials := &models.Credentials{}
+	// You can order your list here. Just change
+	if err = tx.Where("user_id = ?", userID).All(credentials); err != nil {
+		return err
+	}
+	// Make credentials available inside the html template
+	c.Set("credentials", credentials)
 	// Make user available inside the html template
 	c.Set("user", user)
+	c.Set("owner", user.ID == userID)
 	return c.Render(200, r.HTML("users/show.html"))
 }
 

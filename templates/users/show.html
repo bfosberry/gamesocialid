@@ -1,27 +1,24 @@
-<h1>My Profile</h1>
 
-<p>
-  <strong>Username</strong>: <%= user.Username %>
-</p>
-<p>
-  <strong>RealName</strong>: <%= user.RealName %>
-</p>
-<p>
-  <strong>Country</strong>: <%= user.Country %>
-</p>
-<p>
-  <strong>Region</strong>: <%= user.Region %>
-</p>
-<p>
-  <strong>AvatarUrl</strong>: <%= user.AvatarUrl %>
-</p>
-<p>
-  <strong>Email</strong>: <%= user.Email %>
-</p>
-<p>
-  <strong>Public</strong>: <%= user.Visibility %>
-</p>
-
+<div class="row">
+	<div class="col-md-12">
+		<div class="media">
+			 <img alt="Bootstrap Media Preview" src="<%= user.AvatarUrl %>" class="media-object pull-left" />
+			<div class="media-body">
+				<h4 class="media-heading">
+					<%= user.Username %>
+				</h4> <%= user.RealName %>
+				<%= if (owner) { %>
 <ul class="list-unstyled list-inline">
   <li><a href="<%= editUserPath({ user_id: user.ID })%>" class="btn btn-warning">Edit</a></li>
 </ul>
+<% } %>
+
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12">
+	  <%= partial("credentials/list.html") %>
+	</div>
+</div>

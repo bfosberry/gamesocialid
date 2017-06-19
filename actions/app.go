@@ -30,6 +30,9 @@ func App() *buffalo.App {
 		if ENV == "development" {
 			app.Use(middleware.ParameterLogger)
 		}
+		if ENV == "production" {
+			app.Host = "https://id.gamesocial.co"
+		}
 		// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
 		// Remove to disable this.
 		app.Use(middleware.CSRF)

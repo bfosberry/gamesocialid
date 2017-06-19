@@ -2,7 +2,7 @@
   <div class="navbar-header">
     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
        <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
-    </button> <a class="navbar-brand" href="#">GameSocial ID</a>
+    </button> <a class="navbar-brand" href="/">GameSocial ID</a>
   </div>
 
   <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -54,18 +54,18 @@
       <%= if (!error_code || error_code == 401) { %>
         <%= if (is_logged_in) { %>
           <li>
-            <a href="/users/<%= user_id %>" class="login-link" role="button">Profile</a>
+            <a href="/users/<%= user_id %>" class="login-link" role="button"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> Profile</a>
           </li>
           <li>
-            <a href="" class="login-link" role="button" data-toggle="modal" data-target="#accountModal" >Add Account</a>
+            <a href="" class="login-link" role="button" data-toggle="modal" data-target="#accountModal"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add Account</a>
           </li>
           <li>
-            <a href="/auth/logout" class="login-link" role="button">Logout</a>
+            <a href="/auth/logout" class="login-link" role="button"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Logout</a>
           </li>
         <% } else { %>
           <li>
-            <a href="/auth/steam" class="login-link">Login with Steam</a>
-          </li>
+            <a href="" class="login-link" role="button" data-toggle="modal" data-target="#accountModal"><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> Login</a>
+            </li>
         <% } %>
       <% } %>
     </ul>
@@ -76,14 +76,15 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Add Gaming Account</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Sign in</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <a href="/auth/steam" class="btn btn-primary account-button" role="button">Steam</a>
-        <a href="/auth/twitch" class="btn btn-primary account-button" role="button">Twitch</a>
+        <a href="/auth/steam"><img class="account-button rounded" src="https://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_01.png" alt="Steam"></a>
+        <a href="/auth/twitch"><img class="account-button rounded" src="assets/images/twitch.png" alt="Twitch"></a>
+        <a href="/auth/battlenet"><img class="account-button rounded" src="assets/images/battlenet.jpg" alt="Battle.net"></a>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
