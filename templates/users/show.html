@@ -8,11 +8,10 @@
 					<%= user.Username %>
 				</h4> <%= user.RealName %>
 				<%= if (owner) { %>
-<ul class="list-unstyled list-inline">
-  <li><a href="<%= editUserPath({ user_id: user.ID })%>" class="btn btn-warning">Edit</a></li>
-</ul>
-<% } %>
-
+				<ul class="list-unstyled list-inline">
+				  <li><a href="<%= editUserPath({ user_id: user.ID })%>" class="btn btn-warning">Edit</a></li>
+				</ul>
+				<% } %>
 			</div>
 		</div>
 	</div>
