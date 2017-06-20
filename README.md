@@ -1,4 +1,4 @@
-# gamesocialid
+# ![https://id.gamesocial.co/](gamesocialid)
 GameSocial Identity Service provides centralized SSO aggregation for gaming related sites:
 
 * Steam
