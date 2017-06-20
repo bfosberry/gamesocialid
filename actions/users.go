@@ -1,6 +1,8 @@
 package actions
 
 import (
+	"strings"
+
 	"github.com/bfosberry/gamesocialid/models"
 	"github.com/gobuffalo/buffalo"
 	"github.com/markbates/pop"
@@ -191,14 +193,33 @@ func (v UsersResource) Destroy(c buffalo.Context) error {
 	// Allocate an empty User
 	user := &models.User{}
 	// To find the User the parameter user_id is used.
-	err := tx.Find(user, c.Param("user_id"))
-	if err != nil {
+	if err := tx.Find(user, c.Param("user_id")); err != nil {
 		return err
 	}
-	err = tx.Destroy(user)
-	if err != nil {
+
+	if err := tx.Destroy(user); err != nil {
 		return err
 	}
+
+	sessions := &models.UserSessions{}
+	if err := tx.Where("user_id = ?", user.ID).All(sessions); err != nil && !strings.Contains(err.Error(), "no rows in result set") {
+		return err
+	}
+	for _, s := range []models.UserSession(*sessions) {
+		if err := tx.Destroy(&s); err != nil {
+			return err
+		}
+	}
+	credentials := &models.Credentials{}
+	if err := tx.Where("user_id = ?", user.ID).All(credentials); err != nil && !strings.Contains(err.Error(), "no rows in result set") {
+		return err
+	}
+	for _, cred := range []models.Credential(*credentials) {
+		if err := tx.Destroy(&cred); err != nil {
+			return err
+		}
+	}
+
 	// If there are no errors set a flash message
 	c.Flash().Add("success", "User was destroyed successfully")
 	// Redirect to the users index page
