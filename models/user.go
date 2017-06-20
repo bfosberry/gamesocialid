@@ -45,10 +45,8 @@ func (u *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: u.Username, Name: "Username"},
 		&validators.StringIsPresent{Field: u.RealName, Name: "RealName"},
-		&validators.StringIsPresent{Field: u.Country, Name: "Country"},
-		&validators.StringIsPresent{Field: u.Region, Name: "Region"},
 		&validators.StringIsPresent{Field: u.AvatarUrl, Name: "AvatarUrl"},
-		&validators.StringIsPresent{Field: u.Email, Name: "Email"},
+		&validators.EmailIsPresent{Field: u.Email, Name: "Email"},
 	), nil
 }
 

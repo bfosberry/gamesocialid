@@ -53,6 +53,9 @@ func AuthCallback(c buffalo.Context) error {
 		return c.Error(401, err)
 	}
 
+	flashMsg := fmt.Sprintf("Logged in via %s", userData.Provider)
+	redirectURL := "/"
+
 	user, err := currentUser(c)
 	if err != nil {
 		return err
@@ -79,8 +82,11 @@ func AuthCallback(c buffalo.Context) error {
 				return err
 			}
 		}
+		c.Flash().Add("success", flashMsg)
 	} else {
+		created := false
 		if user == nil {
+			created = true
 			user = &models.User{
 				Username:   userData.NickName,
 				RealName:   userData.Name,
@@ -99,10 +105,15 @@ func AuthCallback(c buffalo.Context) error {
 		if err := createCredential(tx, userData, user); err != nil {
 			return err
 		}
-		c.Flash().Add("success", fmt.Sprintf("Successfully signed into %s", userData.Provider))
-	}
+		flashMsg := fmt.Sprintf("Logged in via %s", userData.Provider)
+		if created {
+			flashMsg = fmt.Sprintf("Successfully created user via %s", userData.Provider)
+			redirectURL = fmt.Sprintf("/users/%s/edit", user.ID.String())
+		}
+		c.Flash().Add("success", flashMsg)
 
-	return c.Redirect(http.StatusTemporaryRedirect, "/")
+	}
+	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 }
 
 func createCredential(tx *pop.Connection, userData goth.User, user *models.User) error {
