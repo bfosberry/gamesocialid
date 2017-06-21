@@ -1,0 +1,6 @@
+add_index("users", "username", {"unique": true})
+add_index("credentials", "user_id", {})
+add_index("credentials", ["provider", "uid"], {})
+add_index("user_sessions", "user_id", {})
+add_index("user_sessions", "session_key", {})
+

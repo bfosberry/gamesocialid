@@ -1,0 +1,5 @@
+drop_index("users", "users_username_idx")
+drop_index("credentials", "credentials_user_id_idx")
+drop_index("credentials", "credentials_provider_uid_idx")
+drop_index("user_sessions", "user_sessions_user_id_idx")
+drop_index("user_sessions", "user_sessions_session_key_idx")

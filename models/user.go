@@ -44,6 +44,11 @@ func (u Users) String() string {
 func (u *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: u.Username, Name: "Username"},
+		&validators.RegexMatch{
+			Field: u.Username,
+			Name:  "Username",
+			Expr:  `^[a-z0-9A-Z\-\_]*$`,
+		},
 		&validators.StringIsPresent{Field: u.RealName, Name: "RealName"},
 		&validators.StringIsPresent{Field: u.AvatarUrl, Name: "AvatarUrl"},
 		&validators.EmailIsPresent{Field: u.Email, Name: "Email"},
