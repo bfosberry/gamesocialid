@@ -61,6 +61,7 @@ func (v UsersResource) Show(c buffalo.Context) error {
 	if err != nil {
 		return err
 	}
+
 	if user.Visibility == false && c.Param("user_id") != userID.String() {
 		return c.Error(404, ErrNotFound)
 	}
@@ -126,6 +127,9 @@ func (v UsersResource) Create(c buffalo.Context) error {
 // Edit renders a edit formular for a user. This function is
 // mapped to the path GET /users/{user_id}/edit
 func (v UsersResource) Edit(c buffalo.Context) error {
+	if err := requireLoggedIn(c); err != nil {
+		return err
+	}
 	userID := currentUserID(c)
 	if c.Param("user_id") != userID.String() {
 		return c.Error(404, ErrNotFound)
@@ -150,6 +154,9 @@ func (v UsersResource) Edit(c buffalo.Context) error {
 // Update changes a user in the DB. This function is mapped to
 // the path PUT /users/{user_id}
 func (v UsersResource) Update(c buffalo.Context) error {
+	if err := requireLoggedIn(c); err != nil {
+		return err
+	}
 	userID := currentUserID(c)
 	if c.Param("user_id") != userID.String() {
 		return c.Error(404, ErrNotFound)
@@ -189,6 +196,9 @@ func (v UsersResource) Update(c buffalo.Context) error {
 // Destroy deletes a user from the DB. This function is mapped
 // to the path DELETE /users/{user_id}
 func (v UsersResource) Destroy(c buffalo.Context) error {
+	if err := requireLoggedIn(c); err != nil {
+		return err
+	}
 	userID := currentUserID(c)
 	if c.Param("user_id") != userID.String() {
 		return c.Error(404, ErrNotFound)

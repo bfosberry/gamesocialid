@@ -22,6 +22,7 @@ var T *i18n.Translator
 var standardErrorCodes = []int{
 	401,
 	404,
+	403,
 	400,
 	422,
 	500,
@@ -68,8 +69,9 @@ func App() *buffalo.App {
 
 		userGroup := app.Group("/")
 		userGroup.Use(UserLoggedIn)
-		userGroup.Resource("/users", UsersResource{&buffalo.BaseResource{}})
 		userGroup.Resource("/credentials", CredentialsResource{&buffalo.BaseResource{}})
+
+		app.Resource("/users", UsersResource{&buffalo.BaseResource{}})
 
 		adminGroup := userGroup.Group("/")
 		adminGroup.Use(Admin)
