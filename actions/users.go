@@ -59,18 +59,18 @@ func (v UsersResource) Show(c buffalo.Context) error {
 	user := &models.User{}
 	// To find the User the parameter user_id is used.
 	userParam := c.Param("user_id")
-	userID, err := uuid.FromString(userParam)
+	userUUID, err := uuid.FromString(userParam)
 	if err != nil {
 		if err := tx.Where("username = ?", userParam).First(user); err != nil {
 			return err
 		}
 	} else {
-		if err := tx.Find(user, userID); err != nil {
+		if err := tx.Find(user, userUUID); err != nil {
 			return err
 		}
 	}
 
-	if user.Visibility == false && c.Param("user_id") != userID.String() {
+	if user.Visibility == false && user.ID != userID {
 		return c.Error(404, ErrNotFound)
 	}
 
