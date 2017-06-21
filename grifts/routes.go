@@ -18,6 +18,5 @@ var _ = Add("routes", func(c *Context) error {
 	for _, r := range routes {
 		fmt.Fprintf(w, "%s\t %s\t %s\t %s\n", r.Method, r.Path, r.PathName, r.HandlerName)
 	}
-	w.Flush()
-	return nil
+	return w.Flush()
 })

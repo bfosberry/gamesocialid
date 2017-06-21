@@ -29,7 +29,9 @@ type UsersResource struct {
 // GET /users
 func (v UsersResource) List(c buffalo.Context) error {
 	// Get the DB connection from the context
-	requireAdmin(c)
+	if err := requireAdmin(c); err != nil {
+		return err
+	}
 	tx := c.Value("tx").(*pop.Connection)
 	users := &models.Users{}
 	// You can order your list here. Just change
@@ -65,7 +67,7 @@ func (v UsersResource) Show(c buffalo.Context) error {
 
 	credentials := &models.Credentials{}
 	// You can order your list here. Just change
-	if err = tx.Where("user_id = ?", userID).All(credentials); err != nil {
+	if err = tx.Where("user_id = ?", user.ID).All(credentials); err != nil {
 		return err
 	}
 	// Make credentials available inside the html template
@@ -79,7 +81,9 @@ func (v UsersResource) Show(c buffalo.Context) error {
 // New renders the formular for creating a new user.
 // This function is mapped to the path GET /users/new
 func (v UsersResource) New(c buffalo.Context) error {
-	requireAdmin(c)
+	if err := requireAdmin(c); err != nil {
+		return err
+	}
 	// Make user available inside the html template
 	c.Set("user", &models.User{})
 	return c.Render(200, r.HTML("users/new.html"))
@@ -88,8 +92,9 @@ func (v UsersResource) New(c buffalo.Context) error {
 // Create adds a user to the DB. This function is mapped to the
 // path POST /users
 func (v UsersResource) Create(c buffalo.Context) error {
-	requireAdmin(c)
-	// Allocate an empty User
+	if err := requireAdmin(c); err != nil {
+		return err
+	} // Allocate an empty User
 	user := &models.User{}
 	// Bind user to the html form elements
 	err := c.Bind(user)
