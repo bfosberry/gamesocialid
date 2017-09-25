@@ -1,0 +1,11 @@
+---
+buildName: "gamesocialid"
+links:
+  Git: "git@github.com:bfosberry/gamesocialid.git"
+  Job: "http://192.168.99.100:30937/job/gamesocialid"
+  Production: "http://10.0.0.100:80/kubernetes/pods?namespace=default-production"
+  Staging: "http://10.0.0.100:80/kubernetes/pods?namespace=default-staging"
+environments:
+  Staging: "default-staging"
+  Production: "default-production"
+useLocalFlow: true
